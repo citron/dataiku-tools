@@ -4,7 +4,8 @@ ARG dssVersion
 
 ENV DSS_VERSION="$dssVersion" \
     DSS_DATADIR="/home/dataiku/dss" \
-    DSS_PORT=10000
+    DSS_PORT=10000 \
+    DSS_SPARK_VERSION="3.0.1"
 
 # Dataiku account and data dir setup
 RUN useradd dataiku \
@@ -55,6 +56,17 @@ RUN mkdir -p /usr/local/lib/R/site-library \
             'rmarkdown', 'base64enc', 'filelock'), \
             '/usr/local/lib/R/site-library', \
             repos='https://cloud.r-project.org')"
+# Download hadoop (WG)
+RUN DSSHADOOPKIT="dataiku-dss-hadoop-standalone-libs-generic-hadoop3-$DSS_VERSION" \
+    && cd /home/dataiku \
+    && echo "+ Downloading Hadoop kit" \
+    && curl -o "kit_hadoop.tgz" -sS "https://cdn.downloads.dataiku.com/public/studio/$DSS_VERSION/$DSSHADOOPKIT.tar.gz"
+
+# Download Spark ( WG )
+RUN DSSSPARKKIT="dataiku-dss-spark-standalone-$DSS_VERSION-$DSS_SPARK_VERSION-generic-hadoop3" \
+    && cd /home/dataiku \
+    && echo "+ Downloading Spark kit" \
+    && curl -o "kit_spark.tgz" -sS "https://cdn.downloads.dataiku.com/public/studio/$DSS_VERSION/$DSSSPARKKIT.tar.gz"
 
 # Entry point
 WORKDIR /home/dataiku
